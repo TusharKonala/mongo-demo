@@ -39,15 +39,35 @@ async function createCourse() {
 */
 
 async function getCourses() {
+  const pageSize = 10;
+  const pageNumber = 2;
   const result = await Course
     // .find({ price: { $gte: 10, $lte: 20 } })
     // .find({ price: { $in: [10, 15, 20] } })
-    .find()
-    .or([{ author: "Mosh" }, { isPublished: true }]) // any one must b true
+    // .find()
+    // .or([{ author: "Mosh" }, { isPublished: true }]) // any one must b true
     // .and([]) both must be true
-    .limit(10)
-    .sort({ name: 1 })
-    .select({ name: 1, tags: 1 });
+
+    //Regex
+    //starts with mosh
+    // .find({ author: /^Mosh/ })
+
+    // //ends with Hamedani
+    // .find({ author: /Hamedani$/i })
+
+    // //contains Mosh
+    // .find({ author: /.*Mosh.*/i })
+    .find({
+      author: "Mosh",
+      isPublished: true,
+    })
+    // pagination
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize)
+    // .sort({ name: 1 })
+    // .select({ name: 1, tags: 1 });
+    .countDocuments();
+  // returns the total no. of results
   console.log(result);
 }
 
