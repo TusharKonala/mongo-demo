@@ -6,13 +6,49 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB...", err));
 
 const courseSchema = new mongoose.Schema({
-  _id: String,
-  tags: [String],
+  // _id: String,
+  tags: {
+    type: Array,
+    validate: {
+      validator: function (v) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            const result = v && v.length > 0;
+            resolve(result);
+          }, 1000);
+        });
+      },
+      message: "A course should have at least one tag",
+    },
+  },
   date: { type: Date, default: Date.now },
-  name: String,
+  name: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 255,
+    // , match: /pattern/
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ["mobile", "web", "network"],
+    lowercase: true,
+    // uppercase: true,
+    // trim: true,
+  },
   author: String,
   isPublished: Boolean,
-  price: Number,
+  price: {
+    type: Number,
+    required: function () {
+      return this.isPublished;
+    },
+    min: 10,
+    max: 200,
+    get: (v) => Math.round(v),
+    set: (v) => Math.round(v),
+  },
 });
 
 const Course = mongoose.model("Course", courseSchema);
@@ -20,14 +56,24 @@ const Course = mongoose.model("Course", courseSchema);
 async function createCourse() {
   const course = new Course({
     name: "Angular Course",
+    category: "Web",
     author: "Mosh",
-    tags: ["angular", "frontend"],
+    tags: ["frontend"],
     isPublished: true,
+    price: 15.8,
   });
 
-  const result = await course.save();
-  console.log(result);
+  try {
+    const result = await course.save();
+    console.log(result);
+  } catch (ex) {
+    for (field in ex.errors) {
+      console.log(ex.errors[field].message);
+    }
+  }
 }
+
+createCourse();
 
 /*
   eq (equal)
@@ -109,4 +155,11 @@ async function updateCourse(id) {
   console.log(course);
 }
 
-updateCourse("5a68fde3f09ad7646ddec17e");
+// updateCourse("5a68fde3f09ad7646ddec17e");
+
+async function deleteCourse(id) {
+  const result = await Course.deleteOne({ _id: id });
+  console.log(result);
+}
+
+// deleteCourse("5a68fde3f09ad7646ddec17e");
