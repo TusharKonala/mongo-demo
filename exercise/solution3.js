@@ -3,9 +3,10 @@ const mongoose = require("mongoose");
 mongoose
   .connect("mongodb://localhost/mongo-exercises")
   .then(() => console.log('Connecting to the database "mongo-exercises"'))
-  .catch((err) => console.log(error.message));
+  .catch((err) => console.log(err.message));
 
 const courseSchema = new mongoose.Schema({
+  _id: String,
   tags: [String],
   date: { type: Date, default: Date.now },
   name: String,
